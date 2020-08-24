@@ -1,0 +1,29 @@
+{
+    "properties": [
+        {
+            "name": "app.api.kakao.url",
+            "type": "java.lang.String",
+            "description": "카카오 번역 API URL"
+        },
+        {
+            "name": "app.api.kakao.rest-api-key",
+            "type": "java.lang.String",
+            "description": "카카오 번역 REST API KEY"
+        },
+        {
+            "name": "app.api.naver.url",
+            "type": "java.lang.String",
+            "description": "네이버 번역 API URL"
+        },
+        {
+            "name": "app.api.naver.client-id",
+            "type": "java.lang.String",
+            "description": "네이버 번역 Client ID"
+        },
+        {
+            "name": "app.api.naver.client-secret",
+            "type": "java.lang.String",
+            "description": "네이버 번역 Client Secret"
+        }
+    ]
+}
