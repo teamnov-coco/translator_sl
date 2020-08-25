@@ -1,0 +1,35 @@
+#common
+server:
+  port: 80
+
+spring:
+  profiles:
+    active: dev
+
+
+--- #dev
+
+spring:
+  profiles: dev
+  devtools:
+    livereload:
+      enabled: false
+    add-properties: false
+  task:
+    execution:
+      pool:
+        keep-alive: 0
+        
+logging:
+  level:
+    web: info
+
+app:
+  api:
+    kakao:
+      url: 
+      rest-api-key: 
+    naver:
+      url: 
+      client-id: 
+      client-secret: 
