@@ -1,8 +1,10 @@
 package com.teamnov.translator.service.translator.naver;
 
-import java.util.Map;
-
 import javax.annotation.PostConstruct;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonParser;
+import com.teamnov.translator.dto.NovTranslate;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -34,20 +36,46 @@ public class NaverService {
 
     private WebClient con;
 
-    public Mono<Map<String, Object>> kor2Eng(String txt) {
+    public Mono<NovTranslate> kor2Eng(String txt) {
         return con.post()
             .body(BodyInserters.fromFormData("source", "ko").with("target", "en").with("text", txt))
             .retrieve()
-            .bodyToFlux(Object.class)
-            .collectMap(i->{return "naver";}, i->{return i;});
+            .bodyToMono(String.class)
+            .onErrorResume(err->{
+                NovTranslate bean = new NovTranslate();
+                bean.setCom("naver");
+                bean.setCde("err");
+                bean.setMsg(err.toString());
+                return Mono.just(new Gson().toJson(bean));
+            })
+            .map(i->{
+                NovTranslate bean = new NovTranslate();
+                bean.setCom("naver");
+                bean.setCde("ok");
+                bean.setMsg(JsonParser.parseString(i).getAsJsonObject().get("message").getAsJsonObject().get("result").getAsJsonObject().get("translatedText").getAsString());
+                return bean;
+            });
     }
 
-    public Mono<Map<String, Object>> eng2Kor(String txt) {
+    public Mono<NovTranslate> eng2Kor(String txt) {
         return con.post()
-            .body(BodyInserters.fromFormData("source", "en").with("target", "kor").with("text", txt))
+            .body(BodyInserters.fromFormData("source", "en").with("target", "ko").with("text", txt))
             .retrieve()
-            .bodyToFlux(Object.class)
-            .collectMap(i->{return "naver";}, i->{return i;});
+            .bodyToMono(String.class)
+            .onErrorResume(err->{
+                NovTranslate bean = new NovTranslate();
+                bean.setCom("naver");
+                bean.setCde("err");
+                bean.setMsg(err.toString());
+                return Mono.just(new Gson().toJson(bean));
+            })
+            .map(i->{
+                NovTranslate bean = new NovTranslate();
+                bean.setCom("naver");
+                bean.setCde("ok");
+                bean.setMsg(JsonParser.parseString(i).getAsJsonObject().get("message").getAsJsonObject().get("result").getAsJsonObject().get("translatedText").getAsString());
+                return bean;
+            });
     }
 
 }

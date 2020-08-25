@@ -1,8 +1,10 @@
 package com.teamnov.translator.service.translator.kakao;
 
-import java.util.Map;
-
 import javax.annotation.PostConstruct;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonParser;
+import com.teamnov.translator.dto.NovTranslate;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -30,20 +32,46 @@ public class KakaoService {
 
     private WebClient con;
 
-    public Mono<Map<String, Object>> kor2Eng(String txt) {
+    public Mono<NovTranslate> kor2Eng(String txt) {
         return con.post()
             .body(BodyInserters.fromFormData("src_lang", "kr").with("target_lang", "en").with("query", txt))
             .retrieve()
-            .bodyToFlux(Object.class)
-            .collectMap(i->{return "kakao";}, i->{return i;});
+            .bodyToMono(String.class)
+            .onErrorResume(err->{
+                NovTranslate bean = new NovTranslate();
+                bean.setCom("kakao");
+                bean.setCde("err");
+                bean.setMsg(err.toString());
+                return Mono.just(new Gson().toJson(bean));
+            })
+            .map(i->{
+                NovTranslate bean = new NovTranslate();
+                bean.setCom("kakao");
+                bean.setCde("ok");
+                bean.setMsg(JsonParser.parseString(i).getAsJsonObject().get("translated_text").getAsJsonArray().getAsString());
+                return bean;
+            });
     }
 
-    public Mono<Map<String, Object>> eng2Kor(String txt) {
+    public Mono<NovTranslate> eng2Kor(String txt) {
         return con.post()
             .body(BodyInserters.fromFormData("src_lang", "en").with("target_lang", "kr").with("query", txt))
             .retrieve()
-            .bodyToFlux(Object.class)
-            .collectMap(i->{return "kakao";}, i->{return i;});
+            .bodyToMono(String.class)
+            .onErrorResume(err->{
+                NovTranslate bean = new NovTranslate();
+                bean.setCom("kakao");
+                bean.setCde("err");
+                bean.setMsg(err.toString());
+                return Mono.just(new Gson().toJson(bean));
+            })
+            .map(i->{
+                NovTranslate bean = new NovTranslate();
+                bean.setCom("kakao");
+                bean.setCde("ok");
+                bean.setMsg(JsonParser.parseString(i).getAsJsonObject().get("translated_text").getAsJsonArray().getAsString());
+                return bean;
+            });
     }
 
 }

@@ -1,7 +1,6 @@
 package com.teamnov.translator.controller.translator.kakao;
 
-import java.util.Map;
-
+import com.teamnov.translator.dto.NovTranslate;
 import com.teamnov.translator.service.translator.kakao.KakaoService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,13 +20,12 @@ public class KakaoTranslatorController {
     private KakaoService kakaoService;
 
     @GetMapping(path = "/kor2eng", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<Map<String, Object>> kor2Eng(@RequestParam("txt") String txt) {
+    public Mono<NovTranslate> kor2Eng(@RequestParam("txt") String txt) {
         return kakaoService.kor2Eng(txt);
     }
 
     @GetMapping(path = "/eng2kor", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<Map<String, Object>> eng2Kor(@RequestParam("txt") String txt) {
+    public Mono<NovTranslate> eng2Kor(@RequestParam("txt") String txt) {
         return kakaoService.eng2Kor(txt);
     }
-
 }
