@@ -1,7 +1,6 @@
 package com.teamnov.translator.controller.translator.naver;
 
-import java.util.Map;
-
+import com.teamnov.translator.dto.NovTranslate;
 import com.teamnov.translator.service.translator.naver.NaverService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,12 +21,12 @@ public class NaverTranslatorController {
     
 
     @GetMapping(path = "/kor2eng", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<Map<String, Object>> kor2Eng(@RequestParam("txt") String txt) {
+    public Mono<NovTranslate> kor2Eng(@RequestParam("txt") String txt) {
         return naverService.kor2Eng(txt);
     }
 
     @GetMapping(path = "/eng2kor", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<Map<String, Object>> eng2Kor(@RequestParam("txt") String txt) {
+    public Mono<NovTranslate> eng2Kor(@RequestParam("txt") String txt) {
         return naverService.eng2Kor(txt);
     }    
 
