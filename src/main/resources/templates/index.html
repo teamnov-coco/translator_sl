@@ -96,10 +96,13 @@
             // console.log(ttt);
             if(ttt >= 'ac00' && ttt <= 'd800'){
                 console.log('한글');
+                return 'ko';
             }else if(ttt >= '0041' && ttt <= '007a'){
                 console.log('영어');
+                return 'en';
             }else if(ttt >= '0410' && ttt <= '1040'){
                 console.log('러시아');
+                return 'fj';
             }
             
         }
@@ -114,20 +117,40 @@
             //데이터 적재
             temp = {
                 data: val,
-                sender : '강민준',
+                sender : '사용자',
                 position: 'right',
                 sourceLng: ''
             }
             value.next(temp);
 
             //스트림 열기
-            source = new EventSource(`/kor2eng?txt=${val}`);
+            //url인코딩하기
+
+            //번역기 인터페이스
+// {
+// 	"com": "[kakao, naver, google]" 							//번역기 구분
+// 	"cde": "[err, ok]"											//코드 구분
+// 	"msg": "[(cde==err ? 에러메시지스트링), (cde==ok) ? 결과값 스트링]"		//결과메시지
+// }
+
+            //source = new EventSource(`/kor2eng?txt=${val}& `);
+
+            var url = '';
+            if(sourceLng === 'ko'){
+                url = `/kor2eng?txt=${val}`; 
+            }else if(sourceLng === 'en'){
+                url = `/eng2kor?txt=${val}`;
+            }
+            var source = new EventSource(url);
 
             source.onmessage = function(ev) {
-                console.log(ev.data);
+               
+                console.log(Object.values(JSON.parse(ev.data))[0]);
 
-                temp.data = Object.entries(JSON.parse(ev.data))[0][1];
-                temp.sender = Object.entries(JSON.parse(ev.data))[0][0];
+                // temp.data = Object.entries(JSON.parse(ev.data))[0][1];
+                // temp.sender = Object.entries(JSON.parse(ev.data))[0][0];
+                temp.data = Object.values(JSON.parse(ev.data))[2]
+                temp.sender = Object.values(JSON.parse(ev.data))[0];
                 temp.position = 'left';
 
                 value.next(temp);
