@@ -62,9 +62,9 @@
 
     <script>
         
-        const {fromEvent} = rxjs;
+        const {fromEvent, of, Observable} = rxjs;
         const {ajax} = rxjs.ajax;
-        const {map,catchError,switchMap,tap, pluck, filter} = rxjs.operators;
+        const {map,catchError,switchMap,tap, pluck, filter, concatMap, distinctUntilChanged, mergeMap} = rxjs.operators;
         const $tranval = document.getElementById("tranval");
         const $tranlist = document.getElementById("tranlist");
         const $trancontent = document.getElementById("trancontent");
@@ -76,9 +76,10 @@
             let clone = elem.cloneNode(true); 
             clone.classList.add(position)
             clone.getElementsByClassName("sender")[0].innerHTML = `<span>${sender}</span>`;
-            clone.getElementsByClassName("message")[0].innerHTML = `<span>${ev.data}</span>`;
+            clone.getElementsByClassName("message")[0].innerHTML = `<span>${ev}</span>`;
             $tranlist.appendChild(clone);
        }
+
         function test(testval){
             console.log(testval)
             if(testval == 1){
@@ -87,9 +88,71 @@
                 return 2
             }
         }
-        const sendTran$ = fromEvent(document.getElementById("tranbtn"),"click")
+
+        function test2(testval){
+            
+            var ttt = '000' + testval.codePointAt(0).toString(16);
+            ttt = ttt.substring(ttt.length - 4);
+            // console.log(ttt);
+            if(ttt >= 'ac00' && ttt <= 'd800'){
+                console.log('한글');
+            }else if(ttt >= '0041' && ttt <= '007a'){
+                console.log('영어');
+            }else if(ttt >= '0410' && ttt <= '1040'){
+                console.log('러시아');
+            }
+            
+        }
+        
+
+        
+        const foo =  val => Observable.create(function(value){
+            
+            //소스 코드 언어감지
+            var sourceLng = test2(val);
+
+            //데이터 적재
+            temp = {
+                data: val,
+                sender : '강민준',
+                position: 'right',
+                sourceLng: ''
+            }
+            value.next(temp);
+
+            //스트림 열기
+            source = new EventSource(`/kor2eng?txt=${val}`);
+
+            source.onmessage = function(ev) {
+                console.log(ev.data);
+
+                temp.data = Object.entries(JSON.parse(ev.data))[0][1];
+                temp.sender = Object.entries(JSON.parse(ev.data))[0][0];
+                temp.position = 'left';
+
+                value.next(temp);
+            };
+            source.onerror = function(err) {
+                value.complete();
+                if (source != null) {
+                    source.close();
+                    console.log("close EventSource");
+                    source = null;
+                }
+            };
+
+            
+        });
+
+
+        const clickTran$ = fromEvent(document.getElementById("tranbtn"),"click")
         .pipe(
-            map(() => $tranval.value),
+            map(val => $tranval.value),
+            distinctUntilChanged(),
+            // switchMap(val => foo(val)),
+            concatMap(val => foo(val)),
+            //tap(val => foo(val)),
+           
             // filter(e => 1 === test(e) ),
             
             // switchMap(e =>
@@ -109,33 +172,28 @@
             // )
         )
 
+        clickTran$.subscribe(val => {
+            console.log(val);
+            tranfomat(val.data, val.sender, val.position);
+        })
+      
 
-        
-        
-        function stop() {
-            if (source != null) {
-                source.close();
-                console.log("close EventSource");
-                source = null;
-            }
-        }
+        // sendTran$.subscribe(value => {
+            // source = new EventSource(`/kor2eng?txt=${value}`),
+            // temp = {
+            //     data: value
+            // }
+            // tranfomat(temp,'강민준','right')
 
-        sendTran$.subscribe(value => {
-            source = new EventSource(`/kor2eng?txt=${value}`),
-            temp = {
-                data: value
-            }
-            tranfomat(temp,'강민준','right')
-
-            source.onmessage = function(ev) {
-                console.log("on message: ", ev.data);
-                tranfomat(ev,'네이버','left')
-            };
-            source.onerror = function(err) {
-                console.log("on err: ", err);
-                stop();
-            };
-        });
+            // source.onmessage = function(ev) {
+            //     console.log("on message: ", ev.data);
+            //     tranfomat(ev,'네이버','left')
+            // };
+            // source.onerror = function(err) {
+            //     console.log("on err: ", err);
+            //     stop();
+            // };
+        // });
 
     </script>
 </body>
