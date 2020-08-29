@@ -19,13 +19,12 @@ public class KakaoTranslatorController {
     @Autowired
     private KakaoService kakaoService;
 
-    @GetMapping(path = "/kor2eng", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<NovTranslate> kor2Eng(@RequestParam("txt") String txt) {
-        return kakaoService.kor2Eng(txt);
+    /**
+     * 한국어 -> 영어
+     */ 
+    @GetMapping(path = "/ko2en", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<NovTranslate> ko2En(@RequestParam("txt") String txt) {
+        return kakaoService.ko2En(txt);
     }
 
-    @GetMapping(path = "/eng2kor", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<NovTranslate> eng2Kor(@RequestParam("txt") String txt) {
-        return kakaoService.eng2Kor(txt);
-    }
 }

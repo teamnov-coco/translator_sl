@@ -19,15 +19,13 @@ public class NaverTranslatorController {
     @Autowired
     private NaverService naverService;
     
-
-    @GetMapping(path = "/kor2eng", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<NovTranslate> kor2Eng(@RequestParam("txt") String txt) {
-        return naverService.kor2Eng(txt);
+    /**
+     * 한국어 -> 영어
+     */
+    @GetMapping(path = "/ko2en", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<NovTranslate> ko2En(@RequestParam("txt") String txt) {
+        return naverService.ko2En(txt);
     }
 
-    @GetMapping(path = "/eng2kor", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<NovTranslate> eng2Kor(@RequestParam("txt") String txt) {
-        return naverService.eng2Kor(txt);
-    }    
 
 }
