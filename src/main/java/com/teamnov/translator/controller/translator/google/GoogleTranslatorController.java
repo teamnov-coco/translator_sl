@@ -19,14 +19,12 @@ public class GoogleTranslatorController {
     @Autowired
     private GoogleService googleService;
 
-    @GetMapping(path = "/kor2eng", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<NovTranslate> kor2Eng(@RequestParam("txt") String txt) {
-        return googleService.kor2Eng(txt);
-    }
-
-    @GetMapping(path = "/eng2kor", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<NovTranslate> eng2Kor(@RequestParam("txt") String txt) {
-        return googleService.eng2Kor(txt);
+    /**
+     * 한국어 -> 영어
+     */
+    @GetMapping(path = "/ko2en", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<NovTranslate> ko2En(@RequestParam("txt") String txt) {
+        return googleService.ko2En(txt);
     }
 
 }

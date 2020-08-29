@@ -32,46 +32,164 @@ public class KakaoService {
 
     private WebClient con;
 
-    public Mono<NovTranslate> kor2Eng(String txt) {
-        return con.post()
-            .body(BodyInserters.fromFormData("src_lang", "kr").with("target_lang", "en").with("query", txt))
-            .retrieve()
-            .bodyToMono(String.class)
-            .onErrorResume(err->{
-                NovTranslate bean = new NovTranslate();
-                bean.setCom("kakao");
-                bean.setCde("err");
-                bean.setMsg(err.toString());
-                return Mono.just(new Gson().toJson(bean));
-            })
-            .map(i->{
-                NovTranslate bean = new NovTranslate();
-                bean.setCom("kakao");
-                bean.setCde("ok");
-                bean.setMsg(JsonParser.parseString(i).getAsJsonObject().get("translated_text").getAsJsonArray().getAsString());
-                return bean;
-            });
+    public NovTranslate getTranslateBean(String jsonString) {
+        NovTranslate bean = new NovTranslate();
+        bean.setCom("kakao");
+        bean.setCde("ok");
+        bean.setMsg(JsonParser.parseString(jsonString).getAsJsonObject().get("translated_text").getAsJsonArray().getAsString());
+        return bean;
     }
 
-    public Mono<NovTranslate> eng2Kor(String txt) {
+    public Mono<String> getErrorBean(Throwable err) {
+        NovTranslate bean = new NovTranslate();
+        bean.setCom("kakao");
+        bean.setCde("err");
+        bean.setMsg(err.toString());
+        return Mono.just(new Gson().toJson(bean));
+    }
+
+    /**
+     * 한국어 -> 영어
+     */
+    public Mono<NovTranslate> ko2En(String txt) {
         return con.post()
-            .body(BodyInserters.fromFormData("src_lang", "en").with("target_lang", "kr").with("query", txt))
+            .body(BodyInserters.fromFormData("src_lang", KakaoLang.KOR).with("target_lang", KakaoLang.ENG).with("query", txt))
             .retrieve()
             .bodyToMono(String.class)
-            .onErrorResume(err->{
-                NovTranslate bean = new NovTranslate();
-                bean.setCom("kakao");
-                bean.setCde("err");
-                bean.setMsg(err.toString());
-                return Mono.just(new Gson().toJson(bean));
-            })
-            .map(i->{
-                NovTranslate bean = new NovTranslate();
-                bean.setCom("kakao");
-                bean.setCde("ok");
-                bean.setMsg(JsonParser.parseString(i).getAsJsonObject().get("translated_text").getAsJsonArray().getAsString());
-                return bean;
-            });
+            .onErrorResume(err->getErrorBean(err))
+            .map(i->getTranslateBean(i));
+    }
+
+    /**
+     * 한국어 -> 중국어
+     */
+    public Mono<NovTranslate> ko2Cn(String txt) {
+        return con.post()
+            .body(BodyInserters.fromFormData("src_lang", KakaoLang.KOR).with("target_lang", KakaoLang.CHN).with("query", txt))
+            .retrieve()
+            .bodyToMono(String.class)
+            .onErrorResume(err->getErrorBean(err))
+            .map(i->getTranslateBean(i));
+    }
+
+    /**
+     * 한국어 -> 일본어
+     */
+    public Mono<NovTranslate> ko2Ja(String txt) {
+        return con.post()
+            .body(BodyInserters.fromFormData("src_lang", KakaoLang.KOR).with("target_lang", KakaoLang.JPN).with("query", txt))
+            .retrieve()
+            .bodyToMono(String.class)
+            .onErrorResume(err->getErrorBean(err))
+            .map(i->getTranslateBean(i));
+    }
+
+    /**
+     * 영어 -> 한국어
+     */
+    public Mono<NovTranslate> en2Ko(String txt) {
+        return con.post()
+            .body(BodyInserters.fromFormData("src_lang", KakaoLang.ENG).with("target_lang", KakaoLang.KOR).with("query", txt))
+            .retrieve()
+            .bodyToMono(String.class)
+            .onErrorResume(err->getErrorBean(err))
+            .map(i->getTranslateBean(i));
+    }
+
+    /**
+     * 영어 -> 중국어
+     */
+    public Mono<NovTranslate> en2Cn(String txt) {
+        return con.post()
+            .body(BodyInserters.fromFormData("src_lang", KakaoLang.ENG).with("target_lang", KakaoLang.CHN).with("query", txt))
+            .retrieve()
+            .bodyToMono(String.class)
+            .onErrorResume(err->getErrorBean(err))
+            .map(i->getTranslateBean(i));
+    }
+
+    /**
+     * 영어 -> 일본어
+     */
+    public Mono<NovTranslate> en2Ja(String txt) {
+        return con.post()
+            .body(BodyInserters.fromFormData("src_lang", KakaoLang.ENG).with("target_lang", KakaoLang.JPN).with("query", txt))
+            .retrieve()
+            .bodyToMono(String.class)
+            .onErrorResume(err->getErrorBean(err))
+            .map(i->getTranslateBean(i));
+    }
+
+    /**
+     * 중국어 -> 한국어
+     */
+    public Mono<NovTranslate> cn2Ko(String txt) {
+        return con.post()
+            .body(BodyInserters.fromFormData("src_lang", KakaoLang.CHN).with("target_lang", KakaoLang.KOR).with("query", txt))
+            .retrieve()
+            .bodyToMono(String.class)
+            .onErrorResume(err->getErrorBean(err))
+            .map(i->getTranslateBean(i));
+    }
+
+    /**
+     * 중국어 -> 영어
+     */
+    public Mono<NovTranslate> cn2En(String txt) {
+        return con.post()
+            .body(BodyInserters.fromFormData("src_lang", KakaoLang.CHN).with("target_lang", KakaoLang.ENG).with("query", txt))
+            .retrieve()
+            .bodyToMono(String.class)
+            .onErrorResume(err->getErrorBean(err))
+            .map(i->getTranslateBean(i));
+    }
+
+    /**
+     * 중국어 -> 일본어
+     */
+    public Mono<NovTranslate> cn2Ja(String txt) {
+        return con.post()
+            .body(BodyInserters.fromFormData("src_lang", KakaoLang.CHN).with("target_lang", KakaoLang.JPN).with("query", txt))
+            .retrieve()
+            .bodyToMono(String.class)
+            .onErrorResume(err->getErrorBean(err))
+            .map(i->getTranslateBean(i));
+    }
+
+    /**
+     * 일본어 -> 한국어
+     */
+    public Mono<NovTranslate> ja2Ko(String txt) {
+        return con.post()
+            .body(BodyInserters.fromFormData("src_lang", KakaoLang.JPN).with("target_lang", KakaoLang.KOR).with("query", txt))
+            .retrieve()
+            .bodyToMono(String.class)
+            .onErrorResume(err->getErrorBean(err))
+            .map(i->getTranslateBean(i));
+    }
+
+    /**
+     * 일본어 -> 영어
+     */
+    public Mono<NovTranslate> ja2En(String txt) {
+        return con.post()
+            .body(BodyInserters.fromFormData("src_lang", KakaoLang.JPN).with("target_lang", KakaoLang.ENG).with("query", txt))
+            .retrieve()
+            .bodyToMono(String.class)
+            .onErrorResume(err->getErrorBean(err))
+            .map(i->getTranslateBean(i));
+    }
+
+    /**
+     * 일본어 -> 중국어
+     */
+    public Mono<NovTranslate> ja2Cn(String txt) {
+        return con.post()
+            .body(BodyInserters.fromFormData("src_lang", KakaoLang.JPN).with("target_lang", KakaoLang.CHN).with("query", txt))
+            .retrieve()
+            .bodyToMono(String.class)
+            .onErrorResume(err->getErrorBean(err))
+            .map(i->getTranslateBean(i));
     }
 
 }
