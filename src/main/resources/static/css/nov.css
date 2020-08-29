@@ -1,0 +1,80 @@
+@charset "UTF-8";
+/*reset*/
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,embed,figure,figcaption,footer,header,hgroup,menu,nav,output,ruby,section,summary,time,mark,audio,video{margin:0;padding:0;border:0;font-size:100%;font:inherit;vertical-align:baseline}article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{display:block}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}table{border-collapse:collapse;border-spacing:0}
+/*common*/
+body{background-color: #fff;font-family: AppleSDGothicNeo-Regular,'Malgun Gothic','맑은 고딕',dotum,'돋움',sans-serif}
+body::-webkit-scrollbar{display: none}
+.wrap{display: flex}
+/*index*/
+.index{width: 319px;height: 100vh;border-right: 1px solid rgba(0, 0, 0, 0.03)}
+.index-header{background-color: #fff;height: 40px;padding: 15px;border-bottom: 1px solid rgba(0, 0, 0, 0.03)}
+.index-content{background-color: #fff;overflow: scroll;height: calc(100% - 142px)}
+.index-content::-webkit-scrollbar{display: none}
+.index-footer{background-color: #fff;height: 40px;padding: 15px;border-top: 1px solid rgba(0, 0, 0, 0.03)}
+/*chat*/
+.chat{flex: 1;height: 100vh;background-image: url('/img/background.png');background-color: #f1f1f1;background-position: 0px 80px}
+.chat-header{background-color: #fff;height: 40px;padding: 15px;border-bottom: 1px solid rgba(0, 0, 0, 0.03)}
+.chat-content{background-color: transparent;overflow: scroll;height: calc(100% - 202px);padding: 30px}
+.chat-content::-webkit-scrollbar{display: none}
+.chat-footer{background-color: #fff;height: 55px;padding: 15px 70px 0 30px;border-top: 1px solid rgba(0, 0, 0, 0.03);position: relative}
+/*message*/
+.msg-notice{
+    text-align: center;
+    margin-bottom: 40px;
+    /* padding: 5px 10px; */
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+}
+.msg-notice-text{
+    padding: 5px 10px;
+    background-color: rgba(0, 0, 0, .4);
+    border-radius: 5px;
+}
+.msg-notice:after {display: inline-block; margin: 0 0 3px 20px; height: 1px; content: ''; text-shadow: none; background-color: #926dde; width: calc(50% - 145px); }
+.msg-notice:before {display: inline-block; margin: 0 20px 3px 0; height: 1px; content: ''; text-shadow: none; background-color: #926dde; width: calc(50% - 145px); }
+.msg-wrap{
+    text-align: right;
+    margin-bottom: 15px;
+}
+.msg-wrap.sys{
+    text-align: left;
+}
+.msg-wrap.sys .msg-shape{
+    background-color: #fff;
+    color: #353535;
+}   
+.msg-shape{
+    background-color: #926dde;
+    border-radius: 3px;
+    color: #fff;
+    display: inline-block;
+    padding: 5px 10px;
+    text-align: left;
+    line-height: 150%;
+    word-break: keep-all;
+}
+.msg-subscript{
+    font-size: 13px;
+    font-weight: bold;
+    color: #666;
+    padding: 5px;
+}
+/*component*/
+.source-textarea{color: #8a98ac;font-size: 16px;width: 100%;height: 100%;padding: 0;border: none;resize: none;outline: none;line-height: 120%}
+.source-textarea::-webkit-scrollbar{display: none}
+.translate-btn{position: absolute;right: 20px;top: 25px;font-size: 25px;-webkit-tap-highlight-color: #000}
+.translate-btn:hover,.translate-btn:active{cursor: pointer;color: #926dde}
+i.kakao::before{background-image: url('/img/kakao.ico');display: inline-block;width: 14px;height: 14px;content: '';background-repeat: no-repeat;background-size: 12px 12px;vertical-align: text-bottom;margin-right: .2em}
+i.naver::before{background-image: url('/img/papago.ico');display: inline-block;width: 14px;height: 14px;content: '';background-repeat: no-repeat;background-size: 12px 12px;vertical-align: text-bottom;margin-right: .2em}
+i.google::before{background-image: url('/img/google.ico');display: inline-block;width: 14px;height: 14px;content: '';background-repeat: no-repeat;background-size: 12px 12px;vertical-align: text-bottom;margin-right: .2em}
+@media screen and (max-width: 999px) {
+    /*index*/
+    .index{width: 100%;border-right: none;display: none}
+    /*chat*/
+    .chat{z-index: 1;position: absolute;width: 100vw;height: 100%;display: none}
+    .chat.show{display: block}
+    /*component*/
+    .translate-btn:hover{cursor: default;color: initial}
+
+}

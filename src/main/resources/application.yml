@@ -19,7 +19,9 @@ spring:
     execution:
       pool:
         keep-alive: 0
-        
+  thymeleaf:
+    cache: false
+
 logging:
   level:
     web: debug
