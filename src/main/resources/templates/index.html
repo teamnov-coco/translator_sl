@@ -1,223 +1,179 @@
-<!DOCTYPE html>
 <html lang="ko">
 <head>
-    <title>쏼라</title>
-    <meta charset="utf-8"/>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
-    <script src="./rxjs.umd.min.js"></script>
+<title>쏼라</title>
+<meta charset="utf-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no,viewport-fit=cover">
+<link rel="stylesheet" type="text/css" th:href="@{/nov.css}"/>
+<link rel="stylesheet" type="text/css" th:href="@{/css/fontello.css}"/>
+<script th:src="@{/rxjs.umd.min.js}"></script>
 </head>
 <style>
-    *{ margin: 0; padding: 0; }
-    .tran-wrap .tranbox-header { font-size: 14px; padding: 15px 0; background: #F18C7E; color: white; text-align: center;  }
-    .tran-wrap .tranbox-body {padding-bottom: 80px;}
-    .tran-wrap .tranbox-body ul {width: 100%; list-style: none;}
-    .tran-wrap .tranbox-body li {width: 100%;}
-    .tran-wrap .tranbox-body li.left {text-align: left;}
-    .tran-wrap .tranbox-body li.right {text-align: right;}
-
-    .tran-wrap .tranbox-body ul li > div{font-size: 15px}
-    .tran-wrap .tranbox-body ul li > div.sender { margin: 10px 20px 0 20px; font-weight: bold; }
-    .tran-wrap .tranbox-body ul li > div.message { display: inline-block; word-break:break-all; margin: 5px 20px; max-width: 75%; border: 1px solid #888; padding: 10px; border-radius: 5px; background-color: #FCFCFC; color: #555; text-align: left; }
-
-    .tran-wrap .tranbox-footer {position:fixed; bottom:0; width:100%; background-color:#FFF; text-align: center; border-top:1px solid #F18C7E}
-    .tran-wrap .tranbox-footer .trancol1 {width:80%; height:80px; border: none; float: left;}
-    .tran-wrap .tranbox-footer .trancol1 > textarea {width:100%; height:80px; border: none; }
-    .tran-wrap .tranbox-footer .trancol2 {width:20%; height:80px;float: left;}
-    .tran-wrap .tranbox-footer .trancol2 > button {width:100%; height:80px;border: none; background-color: #7ef1de}
-
     .tran-content {display: none;}
 </style>
 <body>
+
+<div class="wrap-layout">
+    <div class="header-layout">
+        <img th:src="@{/img/logo.png}" width="46" height="40"/>
+    </div>
+    <div class="main-layout" id="tranlist">
+    </div>
+    <div class="footer-layout">
+        <textarea class="source-text" id="tranval" placeholder="번역할 텍스트 입력..."></textarea>
+        <i class="nov-pencil tt" id="tranbtn"></i>
+    </div>
+</div>
+
+
+<div class="message-box-right" id="trancontent">
+    <div class="message-shape">
+        <span class="message-text" id="message">
+        </span>
+    </div>
+    <div class="message-lang" id="sender">
+    </div>
+</div>
+<script>
+        
+    const {fromEvent, Observable} = rxjs;
+    const {map, switchMap, filter, distinctUntilChanged, tap} = rxjs.operators;
+    const $tranval = document.getElementById("tranval");
+    const $tranlist = document.getElementById("tranlist");
+    const $trancontent = document.getElementById("trancontent");
+    // const $tranTargetLng = document.getElementById("targetLng");
     
-    <div class="tran-wrap">
-        <div class="tranbox-header">
-            쏼라
-        </div>
-        <div class="tranbox-body">
-            <ul id="tranlist">
-               
-            </ul>
-        </div>
-        <div class="tranbox-footer">
-            <div class="trancol1">
-                <textarea id="tranval"></textarea>
-            </div>
-            <div class="trancol2">
-                <button id="tranbtn">번역</button>
-            </div>
-        </div>
-    </div>
 
-    <div class="tran-content" id="trancontent">
-        <li>
-            <div class="sender">
-                <span></span>
-            </div>
-            <div class="message">
-                <span></span>
-            </div>
-        </li>
-    </div>
-
-    <script>
-        
-        const {fromEvent, of, Observable} = rxjs;
-        const {ajax} = rxjs.ajax;
-        const {map,catchError,switchMap,tap, pluck, filter, concatMap, distinctUntilChanged, mergeMap} = rxjs.operators;
-        const $tranval = document.getElementById("tranval");
-        const $tranlist = document.getElementById("tranlist");
-        const $trancontent = document.getElementById("trancontent");
-
-       
-        
-       function tranfomat(ev,sender,position){
-            let elem = $trancontent.getElementsByTagName("li")[0]; 
+    function tranfomat(msg,sender,position){
+            let elem = $trancontent; 
             let clone = elem.cloneNode(true); 
-            clone.classList.add(position)
-            clone.getElementsByClassName("sender")[0].innerHTML = `<span>${sender}</span>`;
-            clone.getElementsByClassName("message")[0].innerHTML = `<span>${ev}</span>`;
+            clone.classList.add(`message-box-${position}`)
+            clone.getElementsByClassName("message-lang")[0].innerHTML = `<span>${sender}</span>`;
+            clone.getElementsByClassName("message-text")[0].innerHTML = `${msg}`;
             $tranlist.appendChild(clone);
-       }
-
-        function test(testval){
-            console.log(testval)
-            if(testval == 1){
-                return 1
-            }else{
-                return 2
+            window.scrollTo(0, document.body.scrollHeight);
+            // console.table(document.body);
+    }
+    
+    function detest(msg){
+        var test = msg.split("");
+        var array = [];
+        var asdf = test.reduce((object, currentValue) => {
+            var detect = detectMsg(currentValue);
+            if (!object[detect]) {
+                object[detect] = 0;
             }
-        }
-
-        function test2(testval){
+            object[detect]++;
             
-            var ttt = '000' + testval.codePointAt(0).toString(16);
-            ttt = ttt.substring(ttt.length - 4);
-            // console.log(ttt);
-            if(ttt >= 'ac00' && ttt <= 'd800'){
-                console.log('한글');
-                return 'ko';
-            }else if(ttt >= '0041' && ttt <= '007a'){
-                console.log('영어');
-                return 'en';
-            }else if(ttt >= '0410' && ttt <= '1040'){
-                console.log('러시아');
-                return 'fj';
-            }
-            
-        }
+            return object;
+        },{});
         
+        for(const [key, value] of Object.entries(asdf)) {
+            array.push(`{key:${key},value:${value}}`);
+        };
 
-        
-        const foo =  val => Observable.create(function(value){
-            
-            //소스 코드 언어감지
-            var sourceLng = test2(val);
-
-            //데이터 적재
-            temp = {
-                data: val,
-                sender : '사용자',
-                position: 'right',
-                sourceLng: ''
-            }
-            value.next(temp);
-
-            //스트림 열기
-            //url인코딩하기
-
-            //번역기 인터페이스
-// {
-// 	"com": "[kakao, naver, google]" 							//번역기 구분
-// 	"cde": "[err, ok]"											//코드 구분
-// 	"msg": "[(cde==err ? 에러메시지스트링), (cde==ok) ? 결과값 스트링]"		//결과메시지
-// }
-
-            //source = new EventSource(`/kor2eng?txt=${val}& `);
-
-            var url = '';
-            if(sourceLng === 'ko'){
-                url = `/kor2eng?txt=${val}`; 
-            }else if(sourceLng === 'en'){
-                url = `/eng2kor?txt=${val}`;
-            }
-            var source = new EventSource(url);
-
-            source.onmessage = function(ev) {
-               
-                console.log(Object.values(JSON.parse(ev.data))[0]);
-
-                // temp.data = Object.entries(JSON.parse(ev.data))[0][1];
-                // temp.sender = Object.entries(JSON.parse(ev.data))[0][0];
-                temp.data = Object.values(JSON.parse(ev.data))[2]
-                temp.sender = Object.values(JSON.parse(ev.data))[0];
-                temp.position = 'left';
-
-                value.next(temp);
-            };
-            source.onerror = function(err) {
-                value.complete();
-                if (source != null) {
-                    source.close();
-                    console.log("close EventSource");
-                    source = null;
-                }
-            };
-
-            
+        array.sort((a, b) => {
+            return (a.value < b.value) ? -1 : (a.value > b.value) ? 1: 0;
         });
 
+        console.log(array[0].value);
 
-        const clickTran$ = fromEvent(document.getElementById("tranbtn"),"click")
-        .pipe(
-            map(val => $tranval.value),
-            distinctUntilChanged(),
-            // switchMap(val => foo(val)),
-            concatMap(val => foo(val)),
-            //tap(val => foo(val)),
-           
-            // filter(e => 1 === test(e) ),
-            
-            // switchMap(e =>
-            //     ajax({
-            //         url: `http://localhost:8080/test`,
-            //         method: 'POST',
-            //         headers: {
-            //             'Content-Type': 'application/x-www-form-urlencoded',
-            //            // 'rxjs-custom-header': 'Rxjs'
-            //         },
-            //         body: {
-            //             userId : $session ,
-            //             message : e
-            //         },
-            //         responseType: 'text'
-            //     })
-            // )
-        )
+    }
 
-        clickTran$.subscribe(val => {
-            console.log(val);
-            tranfomat(val.data, val.sender, val.position);
-        })
-      
+    function detectMsg(msg){
+        var code = '000' + msg.codePointAt(0).toString(16);
+        code = code.substring(code.length - 4);
+        if(code >= 'ac00' && code <= 'd800'){
+            //한국
+            return 'ko';
+        }else if(code >= '0041' && code <= '007a'){
+            //영어
+            return 'en';
+        }else if(code >= '4e00' && code <= '9fbf'){
+            //중국어
+            return 'cn';
+        }else if((code >= '3040' && code <= '30ff') || code >= '31f0' && code <= '31ff'){
+            //일본어
+            return 'ja';
+        }else{
+            return 'ko';
+        }
+    }
+    
+    // function duplicationLng(msg){
+    //     var targetLng = $tranTargetLng.value;
+    //     var duplication = detectMsg(msg) == targetLng;
+    //     return duplication;
+    // }
 
-        // sendTran$.subscribe(value => {
-            // source = new EventSource(`/kor2eng?txt=${value}`),
-            // temp = {
-            //     data: value
-            // }
-            // tranfomat(temp,'강민준','right')
+    const sendTran$ =  msg => Observable.create(function(observer){
+        //소스 코드 언어감지
+        var sourceLng = detectMsg(msg);
+        // var targetLng = $tranTargetLng.value;
 
-            // source.onmessage = function(ev) {
-            //     console.log("on message: ", ev.data);
-            //     tranfomat(ev,'네이버','left')
-            // };
-            // source.onerror = function(err) {
-            //     console.log("on err: ", err);
-            //     stop();
-            // };
-        // });
+        //데이터 적재
+        tranData = {
+            data: msg,
+            sender : '사용자',
+            position: 'right',
+            sourceLng: sourceLng,
+            // targetLng: targetLng
+        }
+        observer.next(tranData);
 
-    </script>
+        //url인코딩하기
+
+        //번역기 인터페이스
+        // {
+        // 	"com": "[kakao, naver, google]" 							//번역기 구분
+        // 	"cde": "[err, ok]"											//코드 구분
+        // 	"msg": "[(cde==err ? 에러메시지스트링), (cde==ok) ? 결과값 스트링]"		//결과메시지
+        // }
+
+        //스트림 열기
+        var url = '';
+        if(sourceLng === 'ko'){
+            url = `/kor2eng?txt=${msg}`; 
+        }else if(sourceLng === 'en'){
+            url = `/eng2kor?txt=${msg}`;
+        }
+        var source = new EventSource(url);
+
+        source.onmessage = function(ev) {
+            var object = JSON.parse(ev.data);
+            tranData.data = object.msg;
+            tranData.sender = object.com;
+            tranData.position = 'left';
+            observer.next(tranData);
+        };
+
+        source.onerror = function(err) {
+            observer.complete();
+            if (source != null) {
+                source.close();
+                source = null;
+            }
+        };
+    });
+
+
+    const clickTran$ = fromEvent(document.getElementById("tranbtn"),"click")
+    .pipe(
+        map(e => $tranval.value),
+        filter(e => 1 <= e.length),
+        distinctUntilChanged(),
+        // map(e => ({test1 : e, test2: detest(e)})),
+        // tap(e => console.log(e)),
+        // filter(e => false === duplicationLng(e)),
+        switchMap(e => sendTran$(e)),
+    );
+
+    clickTran$.subscribe(tranData => {
+        tranfomat(tranData.data, tranData.sender, tranData.position);
+    });
+  
+
+</script>
 </body>
+
 </html>
