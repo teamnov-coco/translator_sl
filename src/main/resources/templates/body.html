@@ -8,10 +8,8 @@
             <img th:src="@{/img/logo.png}" width="46" height="40"/>
         </div>
 
-        <div class="index-content">
-            
-            <!-- 히스토리 컨셉 -->
-            <div class="history-wrap">
+        <div class="index-content" id="tranHisContent">
+            <div class="history-wrap" id="tranHisClone">
                 <img th:src="@{/img/kor.png}" width="38" height="38"/>
                 <div class="history-body">
                     <div class="history-body-lang">
@@ -22,46 +20,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- 히스토리 컨셉 -->
-            <div class="history-wrap select">
-                <img th:src="@{/img/eng.png}" width="38" height="38"/>
-                <div class="history-body">
-                    <div class="history-body-lang">
-                        영어<i class="nov-right-big"></i>일본어
-                    </div>
-                    <div class="history-body-text">
-                        Hello i'm Korean...
-                    </div>
-                </div>
-            </div>
-
-            <!-- 히스토리 컨셉 -->
-            <div class="history-wrap">
-                <img th:src="@{/img/chn.png}" width="38" height="38"/>
-                <div class="history-body">
-                    <div class="history-body-lang">
-                        중국어<i class="nov-right-big"></i>한국어
-                    </div>
-                    <div class="history-body-text">
-                        你好我是韩国人...
-                    </div>
-                </div>
-            </div>
-
-            <!-- 히스토리 컨셉 -->
-            <div class="history-wrap">
-                <img th:src="@{/img/jpn.png}" width="38" height="38"/>
-                <div class="history-body">
-                    <div class="history-body-lang">
-                        일본어<i class="nov-right-big"></i>한국어
-                    </div>
-                    <div class="history-body-text">
-                        こんにちは私は韓国人です...
-                    </div>
-                </div>
-            </div>
-
         </div>
 
         <div class="index-footer">
@@ -72,7 +30,7 @@
 
     </div>
 
-    <div class="chat show">
+    <div class="chat ">
         <div class="chat-header">
             
             <div class="lang-selector">
@@ -129,6 +87,19 @@
             </div>
             <div class="msg-subscript">
                 <i class="nov-user">사용자</i>        
+            </div>
+        </div>
+
+        <!-- 히스토리 컨셉 -->
+        <div class="history-wrap" id="tranHisClone">
+            <img th:src="@{/img/kor.png}" width="38" height="38"/>
+            <div class="history-body">
+                <div class="history-body-lang">
+                    한국어<i class="nov-right-big"></i>영어
+                </div>
+                <div class="history-body-text">
+                    안녕하세요 저는 한국사람입니다...
+                </div>
             </div>
         </div>
     </div>

@@ -1,44 +1,33 @@
 const {fromEvent, Observable, from} = rxjs;
-const {map, switchMap, filter, distinctUntilChanged, tap,debounceTime,merge,mergeMap} = rxjs.operators;
+const {map, switchMap, filter, distinctUntilChanged, tap,debounceTime,merge,mergeMap,finalize, pluck} = rxjs.operators;
 const $tranTextarea = document.getElementById("tranTextarea");
 const $tranBtn = document.getElementById("tranBtn");
 const $tranContent = document.getElementById("tranContent");
 const $tranNoticeClone = document.getElementById("tranNoticeClone");
 const $tranWrapClone = document.getElementById("tranWrapClone");
+const $tranHisContent = document.getElementById("tranHisContent");
+const $tranHisClone = document.getElementById("tranHisClone");
 const $tranSourceLng = document.getElementById("sourceLng");
 const $tranTargetLng = document.getElementById("targetLng");
 
-const tranHistory = window.sessionStorage;
-const tranHistoryCount = tranHistory.length;
+var tranHistoryArray = []; 
+var tranHistory = window.sessionStorage;
+tranHistory.clear();
 
-for (let index = 0; index < 4; index++) {
-    tranHistory.setItem(`${index}번인데`,`${index}번값인데`);    
-}
+// for (let index = 0; index < 4; index++) {
+//     tranHistory.setItem(`${index}번인데`,`${index}번값인데`);    
+// }
+// console.log(tranHistory.getItem("test"));
+// for (let index = 0; index < tranHistory.length; index++) {
+//     console.log(tranHistory.key(index));
+// }
 
-var asdfasdf = {
-    test1 : 'tttt',
-    test2 : 'tttt2',
-    test3 : 'tttt3',
-    test4 : 'tttt4',
-}
-
-console.log(asdfasdf);
-tranHistory.setItem(`test`,`${asdfasdf.test2}`);
-// tranHistory.clear();
-console.log(tranHistory.getItem("test"));
-
-for (let index = 0; index < tranHistory.length; index++) {
-    console.log(tranHistory.key(index));
-}
-
-
-
-function tranFomatWrap(msg,sender,senderClass,position){
+function tranFomatWrap(tranData){
     let elem = $tranWrapClone; 
     let clone = elem.cloneNode(true); 
-    clone.classList.add(`${position}`)
-    clone.getElementsByClassName("msg-subscript")[0].innerHTML = `<i class="${senderClass}">${sender}</i>`;
-    clone.getElementsByClassName("msg-shape")[0].innerHTML = `${msg}`;
+    clone.classList.add(`${tranData.position}`)
+    clone.getElementsByClassName("msg-subscript")[0].innerHTML = `<i class="${tranData.senderClass}">${tranData.sender}</i>`;
+    clone.getElementsByClassName("msg-shape")[0].innerHTML = `${tranData.data}`;
     $tranContent.appendChild(clone);
     window.scrollTo(0, document.body.scrollHeight);
 }
@@ -49,6 +38,52 @@ function tranFomatNotice(tranData){
     clone.getElementsByClassName("msg-notice-text")[0].innerHTML = `언어감지(${detectCode2Lng(tranData.sourceLngCode)}) -> ${detectCode2Lng(tranData.targetLngCode)}`;
     $tranContent.appendChild(clone);
     window.scrollTo(0, document.body.scrollHeight);
+}
+
+function tranFomatHis(tranData){
+    let elem = $tranHisClone; 
+    let clone = elem.cloneNode(true); 
+    clone.dataset.id=tranData.hisName;
+    clone.getElementsByClassName("history-body-lang")[0].innerHTML = `${tranData.sourceLng} -> ${tranData.targetLng}`;
+    clone.getElementsByClassName("history-body-text")[0].innerHTML = `${tranData.data}`;
+    clone.addEventListener(clickTranHis$);
+    $tranHisContent.appendChild(clone);
+    window.scrollTo(0, document.body.scrollHeight);
+}
+
+function tranHistoryPush(tranData){
+    var pushData ={
+        data: tranData.data,
+        sender : tranData.sender,
+        senderClass : tranData.senderClass,
+        position: tranData.position,
+        sourceLng: detectCode2Lng(tranData.sourceLngCode),
+        targetLng: detectCode2Lng(tranData.targetLngCode),
+        sourceLngCode: tranData.sourceLngCode,
+        targetLngCode: tranData.targetLngCode
+    }
+    tranHistoryArray.push(pushData);
+}
+
+function tranHistorySet(){
+    //session 저장
+    hisCount = Number(tranHistory.length);
+    tranHistory.setItem(`his${hisCount}`,`${tranHistoryArray}`);
+    var data = {
+        data: tranHistoryArray[0].data,
+        position: tranHistoryArray[0].position,
+        sender: tranHistoryArray[0].sender,
+        senderClass: tranHistoryArray[0].senderClass,
+        sourceLng: tranHistoryArray[0].sourceLng,
+        sourceLngCode: tranHistoryArray[0].sourceLngCode,
+        targetLng: tranHistoryArray[0].targetLng,
+        targetLngCode: tranHistoryArray[0].targetLngCode,
+        hisName: `his${hisCount}`
+    }
+    
+    //history ui
+    tranFomatHis(data);
+    tranHistoryArray = [];
 }
 
 function detectCodeMax(msg){
@@ -70,8 +105,6 @@ function detectCodeMax(msg){
         };
         
         sortArray.sort((a, b) => {
-            console.log(a.value);
-            // console.log(b.value);
             if(Number(a.value) == Number(b.value)){ return 0} return Number(a.value) > Number(b.value) ? -1 : 1;
         });
         return sortArray[0].key;
@@ -119,7 +152,7 @@ function detectCode2Lng(code){
 }
 
 const sendTran$ =  tranData => Observable.create(function(observer){
-    sendData = {
+    var sendData = {
         data: tranData.msg,
         sender : '사용자',
         senderClass : 'nov-user',
@@ -152,6 +185,7 @@ const sendTran$ =  tranData => Observable.create(function(observer){
             source.close();
             source = null;
         }
+        tranHistorySet();
         observer.complete();
     };
 });
@@ -172,16 +206,26 @@ const clickTran$ = fromEvent($tranBtn,"click")
     filter(e => 1 <= e.length),
     distinctUntilChanged(),
     map(e => ({msg : e, sourceLngCode: detectCodeMax(e), targetLngCode: $tranTargetLng.value})),
-    tap(e => console.log(e)),
+    // tap(e => console.log(e)),
     filter(e => e.sourceLngCode != e.targetLngCode),
     tap(e => tranFomatNotice(e)),
     switchMap(e => sendTran$(e)),
-    tap(e => $tranTextarea.value = ""),
-    
+    tap(e => console.log(e)),
+    tap(e => $tranTextarea.value = "")
 );
 
 clickTran$.subscribe(
     tranData => {
-        tranFomatWrap(tranData.data, tranData.sender,tranData.senderClass, tranData.position)
+        tranFomatWrap(tranData),
+        tranHistoryPush(tranData)
     }
+);
+
+const clickTranHis$ = fromEvent(document.getElementsByClassName("history-wrap"),"click")
+.pipe(
+    // pluck("target")
+);
+
+clickTranHis$.subscribe(
+    e => console.log(e)
 );
