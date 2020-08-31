@@ -3,6 +3,7 @@ package com.teamnov.translator.service.translator.kakao;
 import javax.annotation.PostConstruct;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
 import com.teamnov.translator.dto.NovTranslate;
 
@@ -36,7 +37,12 @@ public class KakaoService {
         NovTranslate bean = new NovTranslate();
         bean.setCom("kakao");
         bean.setCde("ok");
-        bean.setMsg(JsonParser.parseString(jsonString).getAsJsonObject().get("translated_text").getAsJsonArray().getAsString());
+        JsonArray array = JsonParser.parseString(jsonString).getAsJsonObject().get("translated_text").getAsJsonArray();
+        StringBuffer sb = new StringBuffer();
+        array.forEach(array2->{
+            array2.getAsJsonArray().forEach(str->sb.append(str.getAsString()));
+        });
+        bean.setMsg(sb.toString());
         return bean;
     }
 
