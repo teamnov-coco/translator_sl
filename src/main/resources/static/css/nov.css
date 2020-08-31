@@ -73,3 +73,9 @@ i.google::before{background-image: url('/img/google.ico');display: inline-block;
     .lang-change-btn:active{opacity: 1}
     .close-chat-btn{display: block;position: absolute;right: 0;top: calc(50% - 22px);border: none;background-color: #fff;font-size: 18px;padding: 12px 5px 12px 8.5px;color: #666;outline: none}
 }
+/*Safari Support*/
+@media not all and (min-resolution:.001dpcm)
+{@supports (-webkit-appearance:none) and (stroke-color:transparent) {
+    .index{height: 100%}
+    .index-content{height: calc(100% - 146px)}
+}}
