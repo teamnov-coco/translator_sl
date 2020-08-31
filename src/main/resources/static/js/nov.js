@@ -14,8 +14,9 @@ const $tranSourceLng = document.getElementById("sourceLng");
 const $tranTargetLng = document.getElementById("targetLng");
 
 var tranHistoryArray = []; 
-var tranHistory = window.sessionStorage;
-tranHistory.clear();
+var tranHistory = window.localStorage;
+var tranHistoryCount = tranHistory.length;
+//tranHistory.clear();
 
 function tranFomatWrap(tranData){
     let elem = $tranWrapClone; 
@@ -58,6 +59,7 @@ function tranFomatHis(tranData){
     clone.getElementsByClassName("history-body-text")[0].dataset.id=tranData.hisName;
     clone.getElementsByClassName("nov-right-big")[0].dataset.id=tranData.hisName;
     $tranHisContent.appendChild(clone);
+    $tranHisContent.scrollTo(0, $tranHisContent.scrollHeight);
 }
 
 function tranHistoryPush(tranData){
@@ -190,6 +192,32 @@ function detectCode2Lng(code){
     }
 }
 
+
+const tranHistoryList$ = Observable.create(function(observer){
+    if(tranHistoryCount != 0){
+        for (let i = 0; i < tranHistoryCount; i++) {
+            var hisData = JSON.parse(tranHistory.getItem(`his${i}`))[0];
+            var setData = {
+                data: hisData.data,
+                position: hisData.position,
+                sender: hisData.sender,
+                senderClass: hisData.senderClass,
+                sourceLng: hisData.sourceLng,
+                sourceLngCode: hisData.sourceLngCode,
+                targetLng: hisData.targetLng,
+                targetLngCode: hisData.targetLngCode,
+                hisName: `his${i}`
+            }
+            observer.next(setData);
+        }
+    }
+    observer.complete();
+}).subscribe(next => {
+    console.log(next);
+    tranFomatHis(next);
+});
+
+
 const sendTran$ =  tranData => Observable.create(function(observer){
     var sendData = {
         data: tranData.msg,
@@ -208,7 +236,7 @@ const sendTran$ =  tranData => Observable.create(function(observer){
     // 	"msg": "[(cde==err ? 에러메시지스트링), (cde==ok) ? 결과값 스트링]"		//결과메시지
     // }
 
-    var url = `/${tranData.sourceLngCode}2${tranData.targetLngCode}?txt=${tranData.msg}`;
+    var url = `/${tranData.sourceLngCode}2${tranData.targetLngCode}?txt=${encodeURIComponent(tranData.msg)}`;
     var source = new EventSource(url);
     source.onmessage = function(ev) {
         var object = JSON.parse(ev.data);
