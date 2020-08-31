@@ -3,38 +3,21 @@
 <div class="wrap">
 
     <div class="index">
-
         <div class="index-header">
             <img th:src="@{/img/logo.png}" width="46" height="40"/>
         </div>
-
         <div class="index-content" id="tranHisContent">
-            <div class="history-wrap" id="tranHisClone">
-                <img th:src="@{/img/kor.png}" width="38" height="38"/>
-                <div class="history-body">
-                    <div class="history-body-lang">
-                        한국어<i class="nov-right-big"></i>영어
-                    </div>
-                    <div class="history-body-text">
-                        안녕하세요 저는 한국사람입니다...
-                    </div>
-                </div>
-            </div>
         </div>
-
         <div class="index-footer">
             <button class="menu-btn">
                 <i class="nov-history"></i>
             </button>
         </div>
-
     </div>
 
-    <div class="chat ">
+    <div class="chat show" id="chatContent">
         <div class="chat-header">
-            
             <div class="lang-selector">
-
                 <div class="lang-selector-left">
                     <select class="lang-selectbox" id="sourceLng">
                         <option selected="selected" value="de">언어감지</option>
@@ -46,7 +29,7 @@
                 </div>
 
                 <!-- 언어 교차 변경 -->
-                <button class="lang-change-btn">
+                <button class="lang-change-btn" id="langChangeBtn">
                     <i class="nov-arrows-cw"></i>
                 </button>
 
@@ -60,12 +43,10 @@
                 </div>
 
                 <!-- ※모바일 chat 닫기 -->
-                <button class="close-chat-btn">
+                <button class="close-chat-btn" id="chatCloseBtn">
                     <i class="nov-cancel"></i>
                 </button>
-
             </div>
-
         </div>
         <div class="chat-content" id="tranContent">
         </div>
@@ -92,7 +73,7 @@
 
         <!-- 히스토리 컨셉 -->
         <div class="history-wrap" id="tranHisClone">
-            <img th:src="@{/img/kor.png}" width="38" height="38"/>
+            <img th:src="@{/img/ko.png}" width="38" height="38"/>
             <div class="history-body">
                 <div class="history-body-lang">
                     한국어<i class="nov-right-big"></i>영어
@@ -103,7 +84,5 @@
             </div>
         </div>
     </div>
-
 </div>
-
 </body>

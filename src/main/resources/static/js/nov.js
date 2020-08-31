@@ -1,5 +1,8 @@
 const {fromEvent, Observable, from} = rxjs;
 const {map, switchMap, filter, distinctUntilChanged, tap,debounceTime,merge,mergeMap,finalize, pluck} = rxjs.operators;
+const $chatContent = document.getElementById("chatContent");
+const $chatCloseBtn = document.getElementById("chatCloseBtn");
+const $langChangeBtn = document.getElementById("langChangeBtn");
 const $tranTextarea = document.getElementById("tranTextarea");
 const $tranBtn = document.getElementById("tranBtn");
 const $tranContent = document.getElementById("tranContent");
@@ -14,14 +17,6 @@ var tranHistoryArray = [];
 var tranHistory = window.sessionStorage;
 tranHistory.clear();
 
-// for (let index = 0; index < 4; index++) {
-//     tranHistory.setItem(`${index}번인데`,`${index}번값인데`);    
-// }
-// console.log(tranHistory.getItem("test"));
-// for (let index = 0; index < tranHistory.length; index++) {
-//     console.log(tranHistory.key(index));
-// }
-
 function tranFomatWrap(tranData){
     let elem = $tranWrapClone; 
     let clone = elem.cloneNode(true); 
@@ -29,26 +24,40 @@ function tranFomatWrap(tranData){
     clone.getElementsByClassName("msg-subscript")[0].innerHTML = `<i class="${tranData.senderClass}">${tranData.sender}</i>`;
     clone.getElementsByClassName("msg-shape")[0].innerHTML = `${tranData.data}`;
     $tranContent.appendChild(clone);
-    window.scrollTo(0, document.body.scrollHeight);
+    $tranContent.scrollTo(0, $tranContent.scrollHeight);
 }
 
 function tranFomatNotice(tranData){
     let elem = $tranNoticeClone; 
     let clone = elem.cloneNode(true); 
-    clone.getElementsByClassName("msg-notice-text")[0].innerHTML = `언어감지(${detectCode2Lng(tranData.sourceLngCode)}) -> ${detectCode2Lng(tranData.targetLngCode)}`;
+    clone.getElementsByClassName("msg-notice-text")[0].innerHTML = `${detectCode2Lng(tranData.sourceLngCode)} <i class="nov-right-big"> ${detectCode2Lng(tranData.targetLngCode)}`;
+    $tranSourceLng.value = tranData.sourceLngCode;
+    $tranTargetLng.value = tranData.targetLngCode;
     $tranContent.appendChild(clone);
-    window.scrollTo(0, document.body.scrollHeight);
+    $tranContent.scrollTo(0, $tranContent.scrollHeight);
 }
 
 function tranFomatHis(tranData){
     let elem = $tranHisClone; 
     let clone = elem.cloneNode(true); 
-    clone.dataset.id=tranData.hisName;
-    clone.getElementsByClassName("history-body-lang")[0].innerHTML = `${tranData.sourceLng} -> ${tranData.targetLng}`;
+    
+    clone.getElementsByTagName("img")[0].src = `/img/${tranData.sourceLngCode}.png`;
+    clone.getElementsByClassName("history-body-lang")[0].innerHTML = `${tranData.sourceLng} <i class="nov-right-big"> ${tranData.targetLng}`;
     clone.getElementsByClassName("history-body-text")[0].innerHTML = `${tranData.data}`;
-    clone.addEventListener(clickTranHis$);
+
+    for (let i = 0; i < $tranHisContent.children.length; i++) {
+        $tranHisContent.children[i].classList.remove('select');
+    }
+    clone.classList.add(`select`)
+
+    clone.dataset.id=tranData.hisName;
+    for (let i = 0; i < clone.children.length; i++) {
+        clone.children[i].dataset.id=tranData.hisName;
+    }
+    clone.getElementsByClassName("history-body-lang")[0].dataset.id=tranData.hisName;
+    clone.getElementsByClassName("history-body-text")[0].dataset.id=tranData.hisName;
+    clone.getElementsByClassName("nov-right-big")[0].dataset.id=tranData.hisName;
     $tranHisContent.appendChild(clone);
-    window.scrollTo(0, document.body.scrollHeight);
 }
 
 function tranHistoryPush(tranData){
@@ -68,7 +77,7 @@ function tranHistoryPush(tranData){
 function tranHistorySet(){
     //session 저장
     hisCount = Number(tranHistory.length);
-    tranHistory.setItem(`his${hisCount}`,`${tranHistoryArray}`);
+    tranHistory.setItem(`his${hisCount}`,`${JSON.stringify(tranHistoryArray)}`);
     var data = {
         data: tranHistoryArray[0].data,
         position: tranHistoryArray[0].position,
@@ -84,6 +93,36 @@ function tranHistorySet(){
     //history ui
     tranFomatHis(data);
     tranHistoryArray = [];
+}
+
+function tranHistorySelect(id){
+    chatOpen();
+
+    for (let i = 0; i < $tranHisContent.children.length; i++) {
+        $tranHisContent.children[i].classList.remove('select');
+    }
+    
+    for (let i = 0; i < $tranHisContent.children.length; i++) {
+        if($tranHisContent.children[i].dataset.id == id){
+            $tranHisContent.children[i].classList.add('select');
+        };
+    }
+}
+
+function chatOpen(){
+    $chatContent.classList.add('show');
+}
+
+function chatClose(){
+    $chatContent.classList.remove('show');
+}
+
+function langChange(){
+    var sourceTmep = $tranSourceLng.value;
+    if( sourceTmep != 'de'){
+        $tranSourceLng.value = $tranTargetLng.value;
+        $tranTargetLng.value = sourceTmep;
+    }
 }
 
 function detectCodeMax(msg){
@@ -206,11 +245,9 @@ const clickTran$ = fromEvent($tranBtn,"click")
     filter(e => 1 <= e.length),
     distinctUntilChanged(),
     map(e => ({msg : e, sourceLngCode: detectCodeMax(e), targetLngCode: $tranTargetLng.value})),
-    // tap(e => console.log(e)),
     filter(e => e.sourceLngCode != e.targetLngCode),
     tap(e => tranFomatNotice(e)),
     switchMap(e => sendTran$(e)),
-    tap(e => console.log(e)),
     tap(e => $tranTextarea.value = "")
 );
 
@@ -221,11 +258,30 @@ clickTran$.subscribe(
     }
 );
 
-const clickTranHis$ = fromEvent(document.getElementsByClassName("history-wrap"),"click")
+const clickTranHis$ = fromEvent($tranHisContent,"click")
 .pipe(
-    // pluck("target")
+    pluck("target","dataset","id"),
+    filter(e => e != null),
+    tap(e => tranHistorySelect(e)),
+    mergeMap(e => from(JSON.parse(tranHistory.getItem(e))))
 );
 
 clickTranHis$.subscribe(
-    e => console.log(e)
+    e => { 
+        if(e.position == "user"){
+            tranFomatNotice(e);
+        }
+        tranFomatWrap(e);
+    }
 );
+
+const chatCloseBtn$ = fromEvent($chatCloseBtn,"click")
+.pipe(
+    tap(e => chatClose())
+).subscribe();
+
+const langChangeBtn$ = fromEvent($langChangeBtn,"click")
+.pipe(
+    tap(e => langChange())
+).subscribe();
+
