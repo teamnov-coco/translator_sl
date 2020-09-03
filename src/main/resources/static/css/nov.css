@@ -10,6 +10,7 @@ body::-webkit-scrollbar{display: none}
 .index-header{background-color: #fff;height: 40px;padding: 15px;border-bottom: 1px solid rgba(0, 0, 0, 0.03)}
 .index-content{background-color: #fff;overflow: scroll;height: calc(100% - 142px)}
 .index-content::-webkit-scrollbar{display: none}
+.index-footer{background-color: #fff;height: 70px;padding: 0 15px;border-top: 1px solid rgba(0, 0, 0, 0.03)}
 /*history*/
 .history-wrap{padding: 15px;border-right: 2px solid #fff;height: 40px}
 .history-wrap.select,.history-wrap:hover{border-right: 2px solid #926dde;background-color: #f1f3f4;cursor: pointer}
@@ -17,8 +18,7 @@ body::-webkit-scrollbar{display: none}
 .history-wrap img{border-radius: 50%;border: 1px solid rgba(0, 0, 0, 0.03)}
 .history-body{display: inline-block}
 .history-body-lang{color: #263a5b;margin-bottom: 10px}
-.history-body-text{font-size: 14px;color: #8A98AC}
-.index-footer{background-color: #fff;height: 70px;padding: 0 15px;border-top: 1px solid rgba(0, 0, 0, 0.03)}
+.history-body-text{font-size: 14px;color: #8a98ac;text-overflow: ellipsis;white-space: nowrap;width: 200px;overflow: hidden}
 /*chat*/
 .chat{flex: 1;height: 100vh;background-image: url('/img/background.png');background-color: #f1f1f1;background-position: 0px 80px}
 .chat-header{background-color: #fff;height: 40px;padding: 15px;border-bottom: 1px solid rgba(0, 0, 0, 0.03)}
@@ -53,25 +53,30 @@ i.google::before{background-image: url('/img/google.ico');display: inline-block;
 .lang-selectbox::-ms-expand{display: none}
 .lang-selectbox:hover,.lang-selectbox:active{opacity: .8;cursor: pointer}
 .lang-change-btn{position: absolute;left: calc(50% - 22px);top: calc(50% - 22px);border: 1px solid rgba(0, 0, 0, 0.03);border-radius: 100%;background-color: #fff;font-size: 18px;padding: 12px 8.5px;color: #666;outline: none}
+.lang-change-btn:hover{transform: scale(1.1) rotate(180deg);transition: all .2s ease-in-out}
 .lang-change-btn:hover,.lang-change-btn:active{color: #fff;background-color: #926dde;cursor: pointer}
 .lang-change-btn:active{opacity: .8}
 .close-chat-btn{display: none}
 .menu-btn{color: #926dde;background-color: #fff;border-top: none;border-left: none;border-right: none;border-bottom: 2px solid #926dde;width: 100%;font-size: 25px;padding: 22px}
+.init-guide-text{background-color: #f1f1f1;height: calc(100% - 250px);text-align: center;padding-top: 250px;color: #666;line-height: 500%}
+.init-guide-text-btn{display: none}
 @media screen and (max-width: 999px) {
     /*index*/
     .index{width: 100%;border-right: none}
     /*chat*/
-    .chat{z-index: 1;position: absolute;width: 100vw;height: 100%;display: none}
+    .chat{z-index: 1;position: fixed;width: 100vw;height: 100%;right: -100%}
     .chat-content{padding: 30px 15px}
     .chat-footer{padding: 15px 90px 0 15px}
-    .chat.show{display: block}
+    .chat.show{right: 0;transform: translateX(0);transition: all .4s ease-out}
     /*component*/
     .translate-btn{right: 15px}
     .translate-btn:hover{cursor: default;color: initial}
     .lang-selectbox:hover,.lang-selectbox:active{opacity: 1;cursor: default}
+    .lang-change-btn:hover{transform: none;transition: none}
     .lang-change-btn:hover,.lang-change-btn:active{color: #666;background-color: #fff;cursor: default}
     .lang-change-btn:active{opacity: 1}
     .close-chat-btn{display: block;position: absolute;right: 0;top: calc(50% - 22px);border: none;background-color: #fff;font-size: 18px;padding: 12px 5px 12px 8.5px;color: #666;outline: none}
+    .init-guide-text-btn{color: #fff;border: none;border-radius: 3px;background-color: #926dde;outline: none;padding: 10px 15px;letter-spacing: 1px;font-weight: bold;font-size: 14px;display: inline}
 }
 /*Safari Support*/
 @media not all and (min-resolution:.001dpcm)
