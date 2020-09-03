@@ -1,6 +1,7 @@
 const {fromEvent, Observable, from} = rxjs;
 const {map, switchMap, filter, distinctUntilChanged, tap,debounceTime,merge,mergeMap,finalize, pluck} = rxjs.operators;
 const $chatContent = document.getElementById("chatContent");
+const $chatOpenBtn = document.getElementById("chatOpenBtn");
 const $chatCloseBtn = document.getElementById("chatCloseBtn");
 const $langChangeBtn = document.getElementById("langChangeBtn");
 const $tranTextarea = document.getElementById("tranTextarea");
@@ -12,11 +13,13 @@ const $tranHisContent = document.getElementById("tranHisContent");
 const $tranHisClone = document.getElementById("tranHisClone");
 const $tranSourceLng = document.getElementById("sourceLng");
 const $tranTargetLng = document.getElementById("targetLng");
+const $guideContent = document.getElementById("guideContent");
+
 
 var tranHistoryArray = []; 
 var tranHistory = window.localStorage;
 var tranHistoryCount = tranHistory.length;
-//tranHistory.clear();
+// tranHistory.clear();
 
 function tranFomatWrap(tranData){
     let elem = $tranWrapClone; 
@@ -93,6 +96,7 @@ function tranHistorySet(){
     }
     
     //history ui
+    guideContent.style.display = 'none';
     tranFomatHis(data);
     tranHistoryArray = [];
 }
@@ -195,6 +199,7 @@ function detectCode2Lng(code){
 
 const tranHistoryList$ = Observable.create(function(observer){
     if(tranHistoryCount != 0){
+        guideContent.style.display = 'none';
         for (let i = 0; i < tranHistoryCount; i++) {
             var hisData = JSON.parse(tranHistory.getItem(`his${i}`))[0];
             var setData = {
@@ -213,7 +218,6 @@ const tranHistoryList$ = Observable.create(function(observer){
     }
     observer.complete();
 }).subscribe(next => {
-    console.log(next);
     tranFomatHis(next);
 });
 
@@ -313,3 +317,7 @@ const langChangeBtn$ = fromEvent($langChangeBtn,"click")
     tap(e => langChange())
 ).subscribe();
 
+const chatOpenBtn$ = fromEvent($chatOpenBtn,"click")
+.pipe(
+    tap(e => chatOpen())
+).subscribe();
