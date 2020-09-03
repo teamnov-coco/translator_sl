@@ -58,6 +58,8 @@ i.google::before{background-image: url('/img/google.ico');display: inline-block;
 .lang-change-btn:active{opacity: .8}
 .close-chat-btn{display: none}
 .menu-btn{color: #926dde;background-color: #fff;border-top: none;border-left: none;border-right: none;border-bottom: 2px solid #926dde;width: 100%;font-size: 25px;padding: 22px}
+.init-guide-text{background-color: #f1f1f1;height: calc(100% - 250px);text-align: center;padding-top: 250px;color: #666;line-height: 500%}
+.init-guide-text-btn{display: none}
 @media screen and (max-width: 999px) {
     /*index*/
     .index{width: 100%;border-right: none}
@@ -74,6 +76,7 @@ i.google::before{background-image: url('/img/google.ico');display: inline-block;
     .lang-change-btn:hover,.lang-change-btn:active{color: #666;background-color: #fff;cursor: default}
     .lang-change-btn:active{opacity: 1}
     .close-chat-btn{display: block;position: absolute;right: 0;top: calc(50% - 22px);border: none;background-color: #fff;font-size: 18px;padding: 12px 5px 12px 8.5px;color: #666;outline: none}
+    .init-guide-text-btn{color: #fff;border: none;border-radius: 3px;background-color: #926dde;outline: none;padding: 10px 15px;letter-spacing: 1px;font-weight: bold;font-size: 14px;display: inline}
 }
 /*Safari Support*/
 @media not all and (min-resolution:.001dpcm)
