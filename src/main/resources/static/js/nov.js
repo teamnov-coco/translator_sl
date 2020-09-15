@@ -21,12 +21,57 @@ var tranHistory = window.localStorage;
 var tranHistoryCount = tranHistory.length;
 // tranHistory.clear();
 
+
+//음성인식
+var voices = [];
+function setVoiceList() {
+    voices = window.speechSynthesis.getVoices();
+}
+
+setVoiceList();
+if (window.speechSynthesis.onvoiceschanged !== undefined) {
+    window.speechSynthesis.onvoiceschanged = setVoiceList;
+}
+
+function speech(txt) {
+    if(!window.speechSynthesis) {
+        alert("음성 재생을 지원하지 않는 브라우저입니다. 크롬, 파이어폭스 등의 최신 브라우저를 이용하세요");
+        return;
+    }
+    var lang = 'ko-KR';
+    var utterThis = new SpeechSynthesisUtterance(txt);
+    utterThis.onend = function (event) {
+        console.log('end');
+    };
+    utterThis.onerror = function(event) {
+        console.log('error', event);
+    };
+    var voiceFound = false;
+    for(var i = 0; i < voices.length ; i++) {
+        if(voices[i].lang.indexOf(lang) >= 0 || voices[i].lang.indexOf(lang.replace('-', '_')) >= 0) {
+            console.log(voices[i])
+            utterThis.voice = voices[i];
+            voiceFound = true;
+        }
+    }
+    if(!voiceFound) {
+        alert('voice not found');
+        return;
+    }
+    utterThis.lang = lang;
+    utterThis.pitch = 1;
+    utterThis.rate = 1; //속도
+    window.speechSynthesis.speak(utterThis);
+}
+
+
 function tranFomatWrap(tranData){
     let elem = $tranWrapClone; 
     let clone = elem.cloneNode(true); 
     clone.classList.add(`${tranData.position}`)
     clone.getElementsByClassName("msg-subscript")[0].innerHTML = `<i class="${tranData.senderClass}">${tranData.sender}</i>`;
     clone.getElementsByClassName("msg-shape")[0].innerHTML = `${tranData.data}`;
+    clone.getElementsByClassName("msg-tts")[0].dataset.id = `${tranData.data}`;
     $tranContent.appendChild(clone);
     $tranContent.scrollTo(0, $tranContent.scrollHeight);
 }
@@ -300,6 +345,7 @@ const clickTranHis$ = fromEvent($tranHisContent,"click")
 
 clickTranHis$.subscribe(
     e => { 
+        console.log(e);
         if(e.position == "user"){
             tranFomatNotice(e);
         }
@@ -321,3 +367,19 @@ const chatOpenBtn$ = fromEvent($chatOpenBtn,"click")
 .pipe(
     tap(e => chatOpen())
 ).subscribe();
+
+
+const clickTts$ = fromEvent($chatContent,"click")
+.pipe(
+    pluck("target","dataset","id"),
+    filter(e => e != null),
+    
+    // tap(e => tranHistorySelect(e)),
+    // mergeMap(e => from(JSON.parse(tranHistory.getItem(e))))
+);
+
+clickTts$.subscribe(
+    e => {
+        speech(e);
+    }
+)
