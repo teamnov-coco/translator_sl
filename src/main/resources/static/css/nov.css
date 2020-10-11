@@ -36,10 +36,14 @@ body::-webkit-scrollbar{display: none}
 .msg-notice:after{display: inline-block;margin: 0 0 3px 20px;height: 1px;content: '';text-shadow: none;background-color: #926dde; width: calc(50% - 110px)}
 .msg-notice:before{display: inline-block;margin: 0 20px 3px 0;height: 1px;content: '';text-shadow: none;background-color: #926dde; width: calc(50% - 110px)}
 .msg-wrap{text-align: right;margin-bottom: 15px}
+.msg-wrap .msg-tts{display: none;}
 .msg-wrap.sys{text-align: left}
-.msg-wrap.sys .msg-shape{background-color: #fff;color: #353535}   
-.msg-shape{background-color: #926dde;border-radius: 3px;color: #fff;display: inline-block;padding: 5px 10px;text-align: left;line-height: 150%;word-break: keep-all}
-.msg-subscript{font-size: 13px;font-weight: bold;color: #666;padding: 5px}
+.msg-wrap.sys .msg-shape{background-color: #fff;color: #353535; float: left;}
+.msg-wrap.sys .msg-shape em{color: #090;}
+.msg-wrap.sys .msg-tts{font-size: 13px;font-weight: bold;color: #666;padding: 5px;display: block;float: left;}
+
+.msg-shape{background-color: #926dde;border-radius: 3px;color: #fff;display: inline-block;padding: 5px 10px;text-align: left;line-height: 150%;word-break: keep-all;}
+.msg-subscript{font-size: 13px;font-weight: bold;color: #666;padding: 5px; clear: both;}
 /*component*/
 .source-textarea{color: #8a98ac;font-size: 16px;width: 100%;height: 100%;padding: 0;border: none;resize: none;outline: none;line-height: 120%;font-weight: bold}
 .source-textarea::placeholder{color: #8a98ac;opacity: .5;}

@@ -1,4 +1,5 @@
-const {fromEvent, Observable, from} = rxjs;
+
+const {fromEvent, Observable, from, of} = rxjs;
 const {map, switchMap, filter, distinctUntilChanged, tap,debounceTime,merge,mergeMap,finalize, pluck} = rxjs.operators;
 const $chatContent = document.getElementById("chatContent");
 const $chatOpenBtn = document.getElementById("chatOpenBtn");
@@ -15,8 +16,9 @@ const $tranSourceLng = document.getElementById("sourceLng");
 const $tranTargetLng = document.getElementById("targetLng");
 const $guideContent = document.getElementById("guideContent");
 
+import {diffString3} from '/js/diff.js';
 
-var tranHistoryArray = []; 
+var tranHistoryArray = {}; 
 var tranHistory = window.localStorage;
 var tranHistoryCount = tranHistory.length;
 // tranHistory.clear();
@@ -27,37 +29,38 @@ var voices = [];
 function setVoiceList() {
     voices = window.speechSynthesis.getVoices();
 }
-
 setVoiceList();
 if (window.speechSynthesis.onvoiceschanged !== undefined) {
     window.speechSynthesis.onvoiceschanged = setVoiceList;
 }
 
-function speech(txt) {
+function speech(id,lang,com) {
     if(!window.speechSynthesis) {
         alert("음성 재생을 지원하지 않는 브라우저입니다. 크롬, 파이어폭스 등의 최신 브라우저를 이용하세요");
         return;
     }
-    var lang = 'ko-KR';
-    var utterThis = new SpeechSynthesisUtterance(txt);
+    var msg= JSON.parse(tranHistory.getItem(id))[com].data;
+
+    lang = detectCode2LngTts(lang);
+    var utterThis = new SpeechSynthesisUtterance(msg);
     utterThis.onend = function (event) {
         console.log('end');
     };
     utterThis.onerror = function(event) {
         console.log('error', event);
     };
-    var voiceFound = false;
-    for(var i = 0; i < voices.length ; i++) {
-        if(voices[i].lang.indexOf(lang) >= 0 || voices[i].lang.indexOf(lang.replace('-', '_')) >= 0) {
-            console.log(voices[i])
-            utterThis.voice = voices[i];
-            voiceFound = true;
-        }
-    }
-    if(!voiceFound) {
-        alert('voice not found');
-        return;
-    }
+    // 브라우저마다 특정 보이스로 하면 중간에 끊키고 오류가나옴 현재는 기본 보이스로 가동하고 나중에 찾기
+    // var voiceFound = false;
+    // for(var i = 0; i < voices.length ; i++) {
+    //     if(voices[i].lang.indexOf(lang) >= 0 || voices[i].lang.indexOf(lang.replace('-', '_')) >= 0) {
+    //         utterThis.voice = voices[i];
+    //         voiceFound = true;
+    //     }
+    // }
+    // if(!voiceFound) {
+    //     alert('voice not found');
+    //     return;
+    // }
     utterThis.lang = lang;
     utterThis.pitch = 1;
     utterThis.rate = 1; //속도
@@ -70,8 +73,10 @@ function tranFomatWrap(tranData){
     let clone = elem.cloneNode(true); 
     clone.classList.add(`${tranData.position}`)
     clone.getElementsByClassName("msg-subscript")[0].innerHTML = `<i class="${tranData.senderClass}">${tranData.sender}</i>`;
-    clone.getElementsByClassName("msg-shape")[0].innerHTML = `${tranData.data}`;
-    clone.getElementsByClassName("msg-tts")[0].dataset.id = `${tranData.data}`;
+    clone.getElementsByClassName("msg-shape")[0].innerHTML = `${tranData.dataDiv}`;
+    clone.getElementsByClassName("nov-tts")[0].dataset.id = `${tranData.hisName}`;
+    clone.getElementsByClassName("nov-tts")[0].dataset.lang = `${tranData.targetLngCode}`;
+    clone.getElementsByClassName("nov-tts")[0].dataset.com = `${tranData.sender}`;
     $tranContent.appendChild(clone);
     $tranContent.scrollTo(0, $tranContent.scrollHeight);
 }
@@ -106,53 +111,55 @@ function tranFomatHis(tranData){
     clone.getElementsByClassName("history-body-lang")[0].dataset.id=tranData.hisName;
     clone.getElementsByClassName("history-body-text")[0].dataset.id=tranData.hisName;
     clone.getElementsByClassName("nov-right-big")[0].dataset.id=tranData.hisName;
-    $tranHisContent.appendChild(clone);
-    $tranHisContent.scrollTo(0, $tranHisContent.scrollHeight);
+    // $tranHisContent.appendChild(clone);
+    $tranHisContent.insertBefore(clone,$tranHisContent.children[0]);
+    $tranHisContent.scrollTo(0,0);
 }
 
 function tranHistoryPush(tranData){
     var pushData ={
         data: tranData.data,
+        dataDiv: tranData.dataDiv,
         sender : tranData.sender,
         senderClass : tranData.senderClass,
         position: tranData.position,
         sourceLng: detectCode2Lng(tranData.sourceLngCode),
         targetLng: detectCode2Lng(tranData.targetLngCode),
         sourceLngCode: tranData.sourceLngCode,
-        targetLngCode: tranData.targetLngCode
+        targetLngCode: tranData.targetLngCode,
+        hisName: tranData.hisName
     }
-    tranHistoryArray.push(pushData);
+    tranHistoryArray[pushData.sender] = pushData;
 }
 
 function tranHistorySet(){
     //session 저장
-    hisCount = Number(tranHistory.length);
+    var hisCount = Number(tranHistory.length);
     tranHistory.setItem(`his${hisCount}`,`${JSON.stringify(tranHistoryArray)}`);
     var data = {
-        data: tranHistoryArray[0].data,
-        position: tranHistoryArray[0].position,
-        sender: tranHistoryArray[0].sender,
-        senderClass: tranHistoryArray[0].senderClass,
-        sourceLng: tranHistoryArray[0].sourceLng,
-        sourceLngCode: tranHistoryArray[0].sourceLngCode,
-        targetLng: tranHistoryArray[0].targetLng,
-        targetLngCode: tranHistoryArray[0].targetLngCode,
+        data: tranHistoryArray['user'].data,
+        dataDiv: tranHistoryArray['user'].data,
+        position: tranHistoryArray['user'].position,
+        sender: tranHistoryArray['user'].sender,
+        senderClass: tranHistoryArray['user'].senderClass,
+        sourceLng: tranHistoryArray['user'].sourceLng,
+        sourceLngCode: tranHistoryArray['user'].sourceLngCode,
+        targetLng: tranHistoryArray['user'].targetLng,
+        targetLngCode: tranHistoryArray['user'].targetLngCode,
         hisName: `his${hisCount}`
     }
     
     //history ui
-    guideContent.style.display = 'none';
+    $guideContent.style.display = 'none';
     tranFomatHis(data);
-    tranHistoryArray = [];
+    tranHistoryArray = {};
 }
 
 function tranHistorySelect(id){
     chatOpen();
-
     for (let i = 0; i < $tranHisContent.children.length; i++) {
         $tranHisContent.children[i].classList.remove('select');
     }
-    
     for (let i = 0; i < $tranHisContent.children.length; i++) {
         if($tranHisContent.children[i].dataset.id == id){
             $tranHisContent.children[i].classList.add('select');
@@ -241,14 +248,33 @@ function detectCode2Lng(code){
     }
 }
 
+function detectCode2LngTts(code){
+    if(code == 'ko'){
+        //한국
+        return 'ko-KR';
+    }else if(code == 'en'){
+        //영어
+        return 'en-US';
+    }else if(code == 'cn'){
+        //중국어
+        return 'zh-CN';
+    }else if(code == 'ja'){
+        //일본어
+        return 'ja-JP';
+    }else{
+        return 'ko';
+    }
+}
+
 
 const tranHistoryList$ = Observable.create(function(observer){
     if(tranHistoryCount != 0){
-        guideContent.style.display = 'none';
+        $guideContent.style.display = 'none';
         for (let i = 0; i < tranHistoryCount; i++) {
-            var hisData = JSON.parse(tranHistory.getItem(`his${i}`))[0];
+            var hisData = JSON.parse(tranHistory.getItem(`his${i}`)).user;
             var setData = {
                 data: hisData.data,
+                dataDiv: hisData.dataDiv,
                 position: hisData.position,
                 sender: hisData.sender,
                 senderClass: hisData.senderClass,
@@ -268,9 +294,11 @@ const tranHistoryList$ = Observable.create(function(observer){
 
 
 const sendTran$ =  tranData => Observable.create(function(observer){
+    var hisCount = Number(tranHistory.length);
     var sendData = {
         data: tranData.msg,
-        sender : '사용자',
+        dataDiv: tranData.msg,
+        sender : 'user',
         senderClass : 'nov-user',
         position: 'user',
         sourceLngCode: tranData.sourceLngCode,
@@ -280,20 +308,34 @@ const sendTran$ =  tranData => Observable.create(function(observer){
 
     //번역기 인터페이스
     // {
-    // 	"com": "[kakao, naver, google]" 							//번역기 구분
-    // 	"cde": "[err, ok]"											//코드 구분
-    // 	"msg": "[(cde==err ? 에러메시지스트링), (cde==ok) ? 결과값 스트링]"		//결과메시지
+    // 	"com": "[kakao, naver, google]" 							            //번역기 구분
+    // 	"cde": "[err, ok]"											            //코드 구분
+    // 	"msg": "[(cde==err ? 에러메시지스트링), (cde==ok) ? 결과값 스트링]"		  //결과메시지
     // }
 
+    var firstData = '';
     var url = `/${tranData.sourceLngCode}2${tranData.targetLngCode}?txt=${encodeURIComponent(tranData.msg)}`;
     var source = new EventSource(url);
     source.onmessage = function(ev) {
         var object = JSON.parse(ev.data);
-        sendData.data = object.msg;
-        sendData.sender = object.com;
-        sendData.senderClass = object.com,
-        sendData.position = 'sys';
-        observer.next(sendData);
+        console.log(object);
+        if(object.cde == 'ok'){
+            sendData.data = object.msg;
+            if(firstData != ''){
+                sendData.dataDiv = diffString3(firstData,object.msg);
+            }else{
+                sendData.dataDiv = object.msg;
+                firstData = object.msg;
+            }
+            sendData.sender = object.com;
+            sendData.senderClass = object.com;
+            sendData.position = 'sys';
+            sendData.hisName= `his${hisCount}`;
+            observer.next(sendData);
+        }else{
+            //err코드
+            // console.log(object.msg);
+        }
     };
 
     source.onerror = function(err) {
@@ -330,8 +372,8 @@ const clickTran$ = fromEvent($tranBtn,"click")
 
 clickTran$.subscribe(
     tranData => {
-        tranFomatWrap(tranData),
-        tranHistoryPush(tranData)
+        tranFomatWrap(tranData);
+        tranHistoryPush(tranData);
     }
 );
 
@@ -340,16 +382,17 @@ const clickTranHis$ = fromEvent($tranHisContent,"click")
     pluck("target","dataset","id"),
     filter(e => e != null),
     tap(e => tranHistorySelect(e)),
-    mergeMap(e => from(JSON.parse(tranHistory.getItem(e))))
+    mergeMap(e => of(JSON.parse(tranHistory.getItem(e))))
 );
 
 clickTranHis$.subscribe(
     e => { 
-        console.log(e);
-        if(e.position == "user"){
-            tranFomatNotice(e);
+        for(const [key, value] of Object.entries(e)) {
+            if(key == "user"){
+                tranFomatNotice(value);
+            }
+            tranFomatWrap(value);
         }
-        tranFomatWrap(e);
     }
 );
 
@@ -371,15 +414,12 @@ const chatOpenBtn$ = fromEvent($chatOpenBtn,"click")
 
 const clickTts$ = fromEvent($chatContent,"click")
 .pipe(
-    pluck("target","dataset","id"),
-    filter(e => e != null),
-    
-    // tap(e => tranHistorySelect(e)),
-    // mergeMap(e => from(JSON.parse(tranHistory.getItem(e))))
+    pluck("target","dataset"),
+    filter(e => e.id != null),
 );
 
 clickTts$.subscribe(
     e => {
-        speech(e);
+        speech(e.id,e.lang,e.com);
     }
 )
