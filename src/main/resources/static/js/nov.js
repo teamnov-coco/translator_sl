@@ -44,7 +44,7 @@ function speech(id,lang,com) {
     lang = detectCode2LngTts(lang);
     var utterThis = new SpeechSynthesisUtterance(msg);
     utterThis.onend = function (event) {
-        console.log('end');
+        // console.log('end');
     };
     utterThis.onerror = function(event) {
         console.log('error', event);
@@ -318,7 +318,6 @@ const sendTran$ =  tranData => Observable.create(function(observer){
     var source = new EventSource(url);
     source.onmessage = function(ev) {
         var object = JSON.parse(ev.data);
-        console.log(object);
         if(object.cde == 'ok'){
             sendData.data = object.msg;
             if(firstData != ''){
